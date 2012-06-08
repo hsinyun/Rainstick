@@ -5,15 +5,14 @@
 #define LIS331_DEVID 0x32
 #define LIS331_ADDR_GYRO 0x68
 #define L3G4200D_ID 0xD3
-
+#define TIMEOUT 1000
 
 void setup() { 
   
   // Set up the built-in LED pin as an output:
   pinMode(BOARD_LED_PIN, OUTPUT);
      
-  Serial1.begin(9600);
-    
+  //Serial Rate 9600 baud
   SerialUSB.println("Hello"); 
   i2c_master_enable(I2C1,I2C_BUS_RESET | I2C_FAST_MODE);
          
@@ -21,16 +20,15 @@ void setup() {
   
 }
 
-
 void loop() {
   
   int16 x_a, y_a, z_a, x_g, y_g, z_g;
   float xf_g, yf_g, zf_g;
-  
+      
   int samplenum = 0;
-
   while(1)
   {
+
     toggleLED();
     delay(100);
     
@@ -77,13 +75,20 @@ void ls331_init()
   msg[0].flags =0;
   msg[0].length =1;
   msg[0].data= buf;
-  i2c_master_xfer(I2C1, msg, 1, 0);
+  if (i2c_master_xfer(I2C1, msg, 1, TIMEOUT) != 0)
+  {
+    SerialUSB.println("Sensor Error!");
+  }
 
   msg[0].addr = LIS331_ADDR_ACC;  
   msg[0].flags = I2C_MSG_READ;
   msg[0].length =1;
   msg[0].data= buf;
-  i2c_master_xfer(I2C1, msg, 1, 0);
+  if (i2c_master_xfer(I2C1, msg, 1, TIMEOUT) != 0)
+  {
+    SerialUSB.println("Sensor Error!");
+  }
+
   dev_id = buf[0];  
   
   if (dev_id != LIS331_DEVID) {
@@ -113,7 +118,11 @@ void ls331_write(uint8 reg, uint8 data, int16 addr)
   msgs[0].flags = 0; // write
   msgs[0].length = 2;
   msgs[0].data = msg_data;
-  i2c_master_xfer(I2C1, msgs, 1,0); 
+  if (i2c_master_xfer(I2C1, msgs, 1, TIMEOUT) != 0)
+  {
+    SerialUSB.println("Sensor Error!");
+  }
+
 }
 
 
@@ -131,9 +140,10 @@ uint16 ls331_read(uint8 reg, int16 addr)
   msg[1].flags = I2C_MSG_READ;
   msg[1].length = 2;
   msg[1].data= buf;
-
-  i2c_master_xfer(I2C1, msg, 2, 0);
- 
+  if (i2c_master_xfer(I2C1, msg, 2, TIMEOUT) != 0)
+  {
+    SerialUSB.println("Sensor Error!");
+  }
   return buf[1]<<8|buf[0];  
 }
 
