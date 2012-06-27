@@ -17,7 +17,7 @@
 //--------------------------------------------------
 // MAIN  
 //--------------------------------------------------
-int length = 300*(MULT_FACTOR/1000);
+int length = 800*(MULT_FACTOR/1000);
 int bounce = 3;   // use 1/10 of this value
 int mass = 32;//16; // the stronger the mass, the stronger the impact
 int rolling_volume = 10; // rolling noise multiplication factor
@@ -282,15 +282,6 @@ void update_physics()
   sin_theta = (float)(x_a-acc_offset)/17000;
   acc = sin_theta*7*MULT_FACTOR;
   
-  // calibration
-//  if(calibrate_flag)
-//  {
-//    acc_offset = (int)((acc + calibrate_samplenum * acc_offset) / calibrate_samplenum);
-//    calibrate_samplenum++;
-//    if(calibrate_samplenum == UPDATE_RATE)
-//      calibrate_flag = 0;
-//  }
-  
   // update speed. 1/UPDATE_RATE is time
   speed = speed + acc/UPDATE_RATE;
 
@@ -338,7 +329,8 @@ void update_physics()
     output = 0; // prevent tick when starts to roll?
   }
        
-  wavelet_ind = ((int)distance)%WAVELET_LEN;   
+  wavelet_ind = ((int)distance)%WAVELET_LEN;
+  if (output > 0xfff)  output=0xfff;
   DAC_output = output;
   
  
